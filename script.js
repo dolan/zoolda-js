@@ -50,22 +50,49 @@ class LevelGenerator {
     generateLevel() {
         let level = [];
         for (let y = 0; y < this.height; y++) {
-            level[y] = [];
-            for (let x = 0; x < this.width; x++) {
-                // Generate random level data (using tile icons)
-                let randomTile = Math.floor(Math.random() * Object.keys(tileIcons).length);
-                level[y][x] = randomTile;
-            }
+            level[y] = new Array(this.width).fill(0); // Initialize with empty space
         }
+
+        // Place player starting position
+        let startX = Math.floor(Math.random() * this.width);
+        let startY = Math.floor(Math.random() * this.height);
+        level[startY][startX] = 0; // Ensure starting position is empty
+
+        // Place exit
+        let endX, endY;
+        do {
+            endX = Math.floor(Math.random() * this.width);
+            endY = Math.floor(Math.random() * this.height);
+        } while (endX === startX && endY === startY); // Ensure exit is not at the start
+        level[endY][endX] = 17; // Use a specific tile for the exit (e.g., 17)
+
+        // Place enemies
+        let numEnemies = Math.floor(Math.random() * 5) + 1; // 1-5 enemies
+        for (let i = 0; i < numEnemies; i++) {
+            let enemyX, enemyY;
+            do {
+                enemyX = Math.floor(Math.random() * this.width);
+                enemyY = Math.floor(Math.random() * this.height);
+            } while (level[enemyY][enemyX] !== 0); // Ensure enemy is placed on empty space
+            level[enemyY][enemyX] = 18 + Math.floor(Math.random() * 4); // Random enemy type
+        }
+
+        // Place power-ups (similar to enemies)
+        // ...
+
         return level;
     }
 }
 
 // Create a level generator instance
-const levelGenerator = new LevelGenerator(20, 15); // Example: 20x15 level
+const levelGenerator = new LevelGenerator(30, 20); // Example: 30x20 level
 
 // Generate the initial level
 let level = levelGenerator.generateLevel();
+
+// Set player's initial position
+player.x = startX * tileSize;
+player.y = startY * tileSize;
 
 // Game loop
 function gameLoop() {
