@@ -1,20 +1,45 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-canvas.width = 800;
-canvas.height = 600;
+canvas.width = 1200;
+canvas.height = 800;
+
+ctx.font = "32px Arial"; // Set font for tile rendering
+
+const tileSize = 32;
 
 // Player object
 const player = {
     x: 100,
     y: 100,
-    width: 32,
-    height: 32,
+    icon: '🧙', // Example: Mage character
     speed: 5
 };
 
-
-const tileSize = 32;
+const tileIcons = {
+    0: ' ', // Empty space
+    1: '🌳', // Tree
+    2: '.', // Dirt road
+    3: ',', // Low grass
+    4: '⛁', // Gravel
+    5: '⛰️', // Mountainous rocks
+    6: '/', // Slanted hill (left)
+    7: '\\', // Slanted hill (right)
+    8: '🌲', // Rough and dense forest
+    9: '🌿', // Swamp land
+    10: '〰️', // Stream
+    11: '🌊', // River
+    12: '💧', // Pond
+    13: '💙', // Lake
+    14: '💦', // Brook
+    15: '🏞️', // Waterfall
+    16: '❤️', // Health bonus
+    17: '🇨🇭', // Large life power-up
+    18: '👹', // Goblin
+    19: '👿', // Orc
+    20: '😈', // Demon
+    21: '🧛', // Vampire
+};
 
 class LevelGenerator {
     constructor(width, height) {
@@ -27,8 +52,9 @@ class LevelGenerator {
         for (let y = 0; y < this.height; y++) {
             level[y] = [];
             for (let x = 0; x < this.width; x++) {
-                // Generate random level data (0 or 1)
-                level[y][x] = Math.round(Math.random());
+                // Generate random level data (using tile icons)
+                let randomTile = Math.floor(Math.random() * Object.keys(tileIcons).length);
+                level[y][x] = randomTile;
             }
         }
         return level;
@@ -71,14 +97,14 @@ function draw() {
     // Draw level
     for (let y = 0; y < level.length; y++) {
         for (let x = 0; x < level[y].length; x++) {
-            if (level[y][x] === 1) {
-                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-            }
+            const tileId = level[y][x];
+            const tileIcon = tileIcons[tileId];
+            ctx.fillText(tileIcon, x * tileSize, y * tileSize + tileSize);
         }
     }
 
     // Draw player
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    ctx.fillText(player.icon, player.x, player.y + tileSize);
 }
 
 // Event listeners for keyboard input
