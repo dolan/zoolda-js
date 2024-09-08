@@ -13,21 +13,33 @@ const player = {
     speed: 5
 };
 
-// Level data (replace with your level generation logic)
-const level = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-];
 
 const tileSize = 32;
+
+class LevelGenerator {
+    constructor(width, height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    generateLevel() {
+        let level = [];
+        for (let y = 0; y < this.height; y++) {
+            level[y] = [];
+            for (let x = 0; x < this.width; x++) {
+                // Generate random level data (0 or 1)
+                level[y][x] = Math.round(Math.random());
+            }
+        }
+        return level;
+    }
+}
+
+// Create a level generator instance
+const levelGenerator = new LevelGenerator(20, 15); // Example: 20x15 level
+
+// Generate the initial level
+let level = levelGenerator.generateLevel();
 
 // Game loop
 function gameLoop() {
