@@ -139,8 +139,8 @@ function draw() {
 
 // Event listeners for keyboard input
 const keys = {};
-addEventListener('keydown', e => keys[e.key] = true);
-addEventListener('keyup', e => delete keys[e.key]);
+document.addEventListener('keydown', e => keys[e.key] = true);
+document.addEventListener('keyup', e => delete keys[e.key]);
 
 // Start the game loop
 gameLoop();
