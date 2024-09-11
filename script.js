@@ -48,14 +48,14 @@ class LevelGenerator {
     }
 
     generateLevel() {
-        let level = [];
+        const level = [];
         for (let y = 0; y < this.height; y++) {
             level[y] = new Array(this.width).fill(0); // Initialize with empty space
         }
 
         // Place player starting position
-        let startX = Math.floor(Math.random() * this.width);
-        let startY = Math.floor(Math.random() * this.height);
+        startX = Math.floor(Math.random() * this.width);
+        startY = Math.floor(Math.random() * this.height);
         level[startY][startX] = 0; // Ensure starting position is empty
 
         // Place exit
@@ -87,8 +87,11 @@ class LevelGenerator {
 // Create a level generator instance
 const levelGenerator = new LevelGenerator(30, 20); // Example: 30x20 level
 
+// Declare startX and startY outside the function scope
+let startX, startY;
+
 // Generate the initial level
-let level = levelGenerator.generateLevel();
+level = levelGenerator.generateLevel();
 
 // Set player's initial position
 player.x = startX * tileSize;
