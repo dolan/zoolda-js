@@ -49,11 +49,8 @@ import LevelGenerator from './level-generator.js';
 // Create a level generator instance
 const levelGenerator = new LevelGenerator(30, 20); // Example: 30x20 level
 
-// Declare startX and startY outside the function scope
-let startX, startY;
-
 // Generate the initial level
-level = levelGenerator.generateLevel();
+const { level, startX, startY } = levelGenerator.generateLevel();
 
 // Set player's initial position
 player.x = startX * tileSize;

@@ -12,8 +12,10 @@ export default class LevelGenerator {
         }
 
         // Place player starting position
-        startX = Math.floor(Math.random() * this.width);
-        startY = Math.floor(Math.random() * this.height); 
+        do {
+            startX = Math.floor(Math.random() * this.width);
+            startY = Math.floor(Math.random() * this.height); 
+        } while (level[startY][startX] !== 0); // Ensure starting position is empty
         level[startY][startX] = 0; // Ensure starting position is empty
 
         // Place exit
@@ -49,7 +51,7 @@ export default class LevelGenerator {
             }
         }
 
-        return level;
+        return { level, startX, startY }; // Return the level and starting position
     }
 
     generatePath(level, startX, startY, endX, endY) {
