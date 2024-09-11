@@ -110,10 +110,15 @@ function isCollisionWithWall(x, y, width, height) {
     }
 
     // Check if any corner of the player is inside a wall tile
-    return wallTileIds.includes(level[tileY][tileX]) ||
-           wallTileIds.includes(level[tileY][tileXRight]) ||
-           wallTileIds.includes(level[tileYBottom][tileX]) ||
-           wallTileIds.includes(level[tileYBottom][tileXRight]);
+    // Check if level[tileY] exists before accessing its elements
+    if (level[tileY] && level[tileYBottom]) {
+        return wallTileIds.includes(level[tileY][tileX]) ||
+               wallTileIds.includes(level[tileY][tileXRight]) ||
+               wallTileIds.includes(level[tileYBottom][tileX]) ||
+               wallTileIds.includes(level[tileYBottom][tileXRight]);
+    } else {
+        return true; // Out of bounds or undefined level data
+    }
 }
 
 function update() {
