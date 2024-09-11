@@ -95,10 +95,10 @@ function movePlayer(dx, dy) {
 
 function isCollisionWithWall(x, y, width, height) {
     // Convert pixel coordinates to tile coordinates
-    const tileX = Math.floor(x / tileSize);
-    const tileY = Math.floor(y / tileSize);
-    const tileXRight = Math.floor((x + width) / tileSize);
-    const tileYBottom = Math.floor((y + height) / tileSize);
+    const tileX = Math.floor((x - tileSize / 2) / tileSize); // Adjust for center of player
+    const tileY = Math.floor((y - tileSize / 2) / tileSize); // Adjust for center of player
+    const tileXRight = Math.floor((x + width + tileSize / 2) / tileSize); // Adjust for center of player
+    const tileYBottom = Math.floor((y + height + tileSize / 2) / tileSize); // Adjust for center of player
 
     // Check for out-of-bounds
     if (tileX < 0 || tileXRight >= level[0].length || tileY < 0 || tileYBottom >= level.length) {
