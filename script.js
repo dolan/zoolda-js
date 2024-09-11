@@ -18,6 +18,7 @@ let player = {
     speed: 5
 };
 
+// Define tile icons here
 const tileIcons = {
     0: ' ', // Empty space
     1: '🌳', // Tree
