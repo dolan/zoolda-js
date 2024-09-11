@@ -141,9 +141,6 @@ const keys = {};
 document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => delete keys[e.key]);
 
-// Import the LevelGenerator class
-import LevelGenerator from './level-generator.js';
-
 // ... (rest of your script.js code)
 
 // Start the game loop
