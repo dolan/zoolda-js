@@ -43,48 +43,7 @@ const tileIcons = {
     21: '🧛', // Vampire
 };
 
-class LevelGenerator {
-    constructor(width, height) {
-        this.width = width;
-        this.height = height;
-    }
-
-    generateLevel() {
-        const level = [];
-        for (let y = 0; y < this.height; y++) {
-            level[y] = new Array(this.width).fill(0); // Initialize with empty space
-        }
-
-        // Place player starting position
-        startX = Math.floor(Math.random() * this.width);
-        startY = Math.floor(Math.random() * this.height);
-        level[startY][startX] = 0; // Ensure starting position is empty
-
-        // Place exit
-        let endX, endY;
-        do {
-            endX = Math.floor(Math.random() * this.width);
-            endY = Math.floor(Math.random() * this.height);
-        } while (endX === startX && endY === startY); // Ensure exit is not at the start
-        level[endY][endX] = 17; // Use a specific tile for the exit (e.g., 17)
-
-        // Place enemies
-        let numEnemies = Math.floor(Math.random() * 5) + 1; // 1-5 enemies
-        for (let i = 0; i < numEnemies; i++) {
-            let enemyX, enemyY;
-            do {
-                enemyX = Math.floor(Math.random() * this.width);
-                enemyY = Math.floor(Math.random() * this.height);
-            } while (level[enemyY][enemyX] !== 0); // Ensure enemy is placed on empty space
-            level[enemyY][enemyX] = 18 + Math.floor(Math.random() * 4); // Random enemy type
-        }
-
-        // Place power-ups (similar to enemies)
-        // ...
-
-        return level;
-    }
-}
+import LevelGenerator from './level-generator.js';
 
 // Create a level generator instance
 const levelGenerator = new LevelGenerator(30, 20); // Example: 30x20 level
@@ -181,6 +140,11 @@ function draw() {
 const keys = {};
 document.addEventListener('keydown', e => keys[e.key] = true);
 document.addEventListener('keyup', e => delete keys[e.key]);
+
+// Import the LevelGenerator class
+import LevelGenerator from './level-generator.js';
+
+// ... (rest of your script.js code)
 
 // Start the game loop
 gameLoop();
