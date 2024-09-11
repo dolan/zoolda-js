@@ -12,6 +12,8 @@ const tileSize = 32;
 const player = {
     x: 100,
     y: 100,
+    width: tileSize, // Player occupies one tile
+    height: tileSize,
     icon: '🧙', // Example: Mage character
     speed: 5
 };
