@@ -5,6 +5,7 @@ export default class LevelGenerator {
     }
 
     generateLevel() {
+        let startX, startY;
         const level = [];
         for (let y = 0; y < this.height; y++) {
             level[y] = new Array(this.width).fill(0); // Initialize with empty space
@@ -12,7 +13,7 @@ export default class LevelGenerator {
 
         // Place player starting position
         startX = Math.floor(Math.random() * this.width);
-        startY = Math.floor(Math.random() * this.height);
+        startY = Math.floor(Math.random() * this.height); 
         level[startY][startX] = 0; // Ensure starting position is empty
 
         // Place exit
