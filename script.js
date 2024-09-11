@@ -94,27 +94,17 @@ function movePlayer(dx, dy) {
 }
 
 function isCollisionWithWall(x, y, width, height) {
-    // Convert pixel coordinates to tile coordinates
-    const tileX = Math.floor((x - tileSize / 2) / tileSize); // Adjust for center of player
-    const tileY = Math.floor((y - tileSize / 2) / tileSize); // Adjust for center of player
-    const tileXRight = Math.floor((x + width + tileSize / 2) / tileSize); // Adjust for center of player
-    const tileYBottom = Math.floor((y + height + tileSize / 2) / tileSize); // Adjust for center of player
+    // Convert pixel coordinates to tile coordinates for the center of the player
+    const centerTileX = Math.floor(x / tileSize + 0.5); 
+    const centerTileY = Math.floor(y / tileSize + 0.5); 
 
-    // Check for out-of-bounds
-    if (tileX < 0 || tileXRight >= level[0].length || tileY < 0 || tileYBottom >= level.length) {
+    // Check for out-of-bounds at the center
+    if (centerTileX < 0 || centerTileX >= level[0].length || centerTileY < 0 || centerTileY >= level.length) {
         return true;
     }
 
-    // Check if any corner of the player is inside a wall tile
-    // Check if level[tileY] exists before accessing its elements
-    if (level[tileY] && level[tileYBottom]) {
-        return wallTileIds.includes(level[tileY][tileX]) ||
-               wallTileIds.includes(level[tileY][tileXRight]) ||
-               wallTileIds.includes(level[tileYBottom][tileX]) ||
-               wallTileIds.includes(level[tileYBottom][tileXRight]);
-    } else {
-        return true; // Out of bounds or undefined level data
-    }
+    // Check if the center tile is a wall tile
+    return wallTileIds.includes(level[centerTileY][centerTileX]); 
 }
 
 function update() {
