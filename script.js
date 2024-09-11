@@ -9,6 +9,7 @@ ctx.font = "32px Arial"; // Set font for tile rendering
 const tileSize = 32;
 
 // Player object
+let level;
 const player = {
     x: 100,
     y: 100,
