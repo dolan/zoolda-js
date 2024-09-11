@@ -99,27 +99,65 @@ level = levelGenerator.generateLevel();
 player.x = startX * tileSize;
 player.y = startY * tileSize;
 
+// Define wall tile IDs
+const wallTileIds = [1, 5, 8]; // Example: Trees, mountains, dense forest
+
 // Game loop
 function gameLoop() {
+    handleInput();
     update();
     draw();
     requestAnimationFrame(gameLoop);
 }
 
-function update() {
+function handleInput() {
     // Player movement
-    if (keys['ArrowLeft'] && player.x > 0) {
-        player.x -= player.speed;
+    if (keys['ArrowLeft']) {
+        movePlayer(-player.speed, 0);
     }
-    if (keys['ArrowRight'] && player.x < canvas.width - player.width) {
-        player.x += player.speed;
+    if (keys['ArrowRight']) {
+        movePlayer(player.speed, 0);
     }
-    if (keys['ArrowUp'] && player.y > 0) {
-        player.y -= player.speed;
+    if (keys['ArrowUp']) {
+        movePlayer(0, -player.speed);
     }
-    if (keys['ArrowDown'] && player.y < canvas.height - player.height) {
-        player.y += player.speed;
+    if (keys['ArrowDown']) {
+        movePlayer(0, player.speed);
     }
+}
+
+function movePlayer(dx, dy) {
+    const newX = player.x + dx;
+    const newY = player.y + dy;
+
+    // Collision detection with walls
+    if (!isCollisionWithWall(newX, newY, player.width, player.height)) {
+        player.x = newX;
+        player.y = newY;
+    }
+}
+
+function isCollisionWithWall(x, y, width, height) {
+    // Convert pixel coordinates to tile coordinates
+    const tileX = Math.floor(x / tileSize);
+    const tileY = Math.floor(y / tileSize);
+    const tileXRight = Math.floor((x + width) / tileSize);
+    const tileYBottom = Math.floor((y + height) / tileSize);
+
+    // Check for out-of-bounds
+    if (tileX < 0 || tileXRight >= level[0].length || tileY < 0 || tileYBottom >= level.length) {
+        return true;
+    }
+
+    // Check if any corner of the player is inside a wall tile
+    return wallTileIds.includes(level[tileY][tileX]) ||
+           wallTileIds.includes(level[tileY][tileXRight]) ||
+           wallTileIds.includes(level[tileYBottom][tileX]) ||
+           wallTileIds.includes(level[tileYBottom][tileXRight]);
+}
+
+function update() {
+    // Add any other game logic here (e.g., enemy movement)
 }
 
 function draw() {
