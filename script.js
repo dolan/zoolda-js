@@ -9,8 +9,7 @@ ctx.font = "32px Arial"; // Set font for tile rendering
 const tileSize = 32;
 
 // Player object
-let level;
-const player = {
+let player = {
     x: 100,
     y: 100,
     width: tileSize, // Player occupies one tile
@@ -50,7 +49,7 @@ import LevelGenerator from './level-generator.js';
 const levelGenerator = new LevelGenerator(30, 20); // Example: 30x20 level
 
 // Generate the initial level
-const { level, startX, startY } = levelGenerator.generateLevel();
+let { level, startX, startY } = levelGenerator.generateLevel();
 
 // Set player's initial position
 player.x = startX * tileSize;
