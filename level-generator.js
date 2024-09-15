@@ -155,4 +155,12 @@ export default class LevelGenerator {
         // If openSet is empty and end was not reached
         return false;
     }
+
+    saveLevel(level) {
+        return JSON.stringify(level);
+    }
+
+    loadLevel(json) {
+        return JSON.parse(json);
+    }
 }
