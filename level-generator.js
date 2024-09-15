@@ -6,6 +6,7 @@ export default class LevelGenerator {
     }
 
     generateLevel() {
+        console.log('Generating level...');
         let level;
         let startX, startY, endX, endY;
         let isPathValid = false;
@@ -13,6 +14,7 @@ export default class LevelGenerator {
 
         // Loop until a valid level with a path is generated
         while (!isPathValid) {
+            console.log('Attempting generation...');
             level = [];
             for (let y = 0; y < this.height; y++) {
                 level[y] = new Array(this.width).fill(0); // Initialize with empty space
