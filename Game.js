@@ -16,6 +16,9 @@ export default class Game {
 
         this.keys = {};
         this.setupEventListeners();
+
+        this.message = null;
+        this.messageTimeout = null;
     }
 
     initializeGame() {
@@ -34,8 +37,29 @@ export default class Game {
     }
 
     setupEventListeners() {
-        document.addEventListener('keydown', e => this.keys[e.key] = true);
+        document.addEventListener('keydown', e => {
+            this.keys[e.key] = true;
+            if (e.key === 'Enter' && this.message) {
+                this.dismissMessage();
+            }
+        });
         document.addEventListener('keyup', e => delete this.keys[e.key]);
+    }
+
+    showMessage(text, duration = 5000) {
+        this.message = text;
+        if (this.messageTimeout) {
+            clearTimeout(this.messageTimeout);
+        }
+        this.messageTimeout = setTimeout(() => this.dismissMessage(), duration);
+    }
+
+    dismissMessage() {
+        this.message = null;
+        if (this.messageTimeout) {
+            clearTimeout(this.messageTimeout);
+            this.messageTimeout = null;
+        }
     }
 
     handleInput() {
@@ -81,15 +105,24 @@ export default class Game {
         this.enemies.forEach(enemy => enemy.move(this.player, this.level));
         
         if (this.isCollisionWithEnemy(this.player.x, this.player.y)) {
-            console.log("Game Over! Player collided with an enemy.");
             this.gameOver();
+        }
+
+        if (this.isPlayerAtExit()) {
+            this.showMessage("Congratulations! You've reached the exit!", 3000);
+            setTimeout(() => this.initializeGame(), 3000);
         }
     }
 
+    isPlayerAtExit() {
+        const playerTileX = Math.floor(this.player.x / TILE_SIZE);
+        const playerTileY = Math.floor(this.player.y / TILE_SIZE);
+        return this.level[playerTileY][playerTileX] === 17; // 17 is the exit tile
+    }
+
     gameOver() {
-        // Implement game over logic here
-        // For now, we'll just reset the game
-        this.initializeGame();
+        this.showMessage("Game Over! You were caught by an enemy.", 3000);
+        setTimeout(() => this.initializeGame(), 3000);
     }
 
     draw() {
@@ -105,6 +138,37 @@ export default class Game {
 
         this.player.draw(this.ctx);
         this.enemies.forEach(enemy => enemy.draw(this.ctx));
+
+        if (this.message) {
+            this.drawMessage();
+        }
+    }
+
+    drawMessage() {
+        const padding = 20;
+        const lineHeight = 40;
+        const lines = this.message.split('\n');
+        const messageWidth = Math.max(...lines.map(line => this.ctx.measureText(line).width)) + padding * 2;
+        const messageHeight = lines.length * lineHeight + padding * 2;
+
+        const x = (this.canvas.width - messageWidth) / 2;
+        const y = (this.canvas.height - messageHeight) / 2;
+
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        this.ctx.fillRect(x, y, messageWidth, messageHeight);
+
+        this.ctx.fillStyle = 'white';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.font = '24px Arial';
+
+        lines.forEach((line, index) => {
+            this.ctx.fillText(line, this.canvas.width / 2, y + padding + lineHeight * (index + 0.5));
+        });
+
+        this.ctx.textAlign = 'start';
+        this.ctx.textBaseline = 'alphabetic';
+        this.ctx.font = '32px Arial';
     }
 
     gameLoop() {
