@@ -1,6 +1,7 @@
 import { CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, TILE_ICONS, WALL_TILE_IDS } from './Constants.js';
 import Player from './Player.js';
 import LevelGenerator from './level-generator.js';
+import { Goblin, Orc, Demon, Vampire } from './Enemy.js';
 
 export default class Game {
     constructor(canvas) {
@@ -18,9 +19,18 @@ export default class Game {
     }
 
     initializeGame() {
-        const { level, startX, startY } = this.levelGenerator.generateLevel();
+        const { level, startX, startY, enemies } = this.levelGenerator.generateLevel();
         this.level = level;
         this.player = new Player(startX * TILE_SIZE, startY * TILE_SIZE);
+        this.enemies = enemies.map(enemy => {
+            switch(enemy.type) {
+                case 18: return new Goblin(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
+                case 19: return new Orc(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
+                case 20: return new Demon(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
+                case 21: return new Vampire(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
+                default: return null;
+            }
+        }).filter(enemy => enemy !== null);
     }
 
     setupEventListeners() {
@@ -56,7 +66,7 @@ export default class Game {
 
     update() {
         this.handleInput();
-        // Add any other game logic here (e.g., enemy movement)
+        this.enemies.forEach(enemy => enemy.move(this.player, this.level));
     }
 
     draw() {
@@ -71,6 +81,7 @@ export default class Game {
         }
 
         this.player.draw(this.ctx);
+        this.enemies.forEach(enemy => enemy.draw(this.ctx));
     }
 
     gameLoop() {
