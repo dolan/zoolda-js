@@ -48,7 +48,8 @@ export default class Game {
     movePlayer(dx, dy) {
         const newX = this.player.x + dx;
         const newY = this.player.y + dy;
-        if (!this.isCollisionWithWall(newX, newY, this.player.width, this.player.height)) {
+        if (!this.isCollisionWithWall(newX, newY, this.player.width, this.player.height) &&
+            !this.isCollisionWithEnemy(newX, newY)) {
             this.player.move(dx, dy);
         }
     }
@@ -64,9 +65,31 @@ export default class Game {
         return WALL_TILE_IDS.includes(this.level[centerTileY][centerTileX]);
     }
 
+    isCollisionWithEnemy(x, y) {
+        const playerRadius = TILE_SIZE / 2;
+        const enemyRadius = TILE_SIZE * 0.75; // Larger collision radius for enemies
+        return this.enemies.some(enemy => {
+            const dx = enemy.x + TILE_SIZE / 2 - (x + playerRadius);
+            const dy = enemy.y + TILE_SIZE / 2 - (y + playerRadius);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < playerRadius + enemyRadius;
+        });
+    }
+
     update() {
         this.handleInput();
         this.enemies.forEach(enemy => enemy.move(this.player, this.level));
+        
+        if (this.isCollisionWithEnemy(this.player.x, this.player.y)) {
+            console.log("Game Over! Player collided with an enemy.");
+            this.gameOver();
+        }
+    }
+
+    gameOver() {
+        // Implement game over logic here
+        // For now, we'll just reset the game
+        this.initializeGame();
     }
 
     draw() {
