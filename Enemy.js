@@ -68,7 +68,7 @@ class Enemy {
 export class Goblin extends Enemy {
     constructor(x, y) {
         super(x, y, '👹');
-        this.speed = 1.5;
+        this.speed = 3.5;
         this.detectionRadius = 4 * TILE_SIZE;
     }
 }
@@ -76,7 +76,7 @@ export class Goblin extends Enemy {
 export class Orc extends Enemy {
     constructor(x, y) {
         super(x, y, '👿');
-        this.speed = 1;
+        this.speed = 3;
         this.detectionRadius = 6 * TILE_SIZE;
     }
 }
@@ -84,7 +84,7 @@ export class Orc extends Enemy {
 export class Demon extends Enemy {
     constructor(x, y) {
         super(x, y, '😈');
-        this.speed = 2;
+        this.speed = 5;
         this.detectionRadius = 7 * TILE_SIZE;
     }
 
