@@ -9,15 +9,16 @@ export default class Player {
         this.icon = '🧙';
         this.speed = 5;
         this.bullets = 0;
-        this.lastDirection = { dx: 0, dy: 0 };
+        this.facing = 'right'; // Default facing direction
     }
 
     move(dx, dy) {
         this.x += dx;
         this.y += dy;
-        if (dx !== 0 || dy !== 0) {
-            this.lastDirection = { dx, dy };
-        }
+        if (dx > 0) this.facing = 'right';
+        else if (dx < 0) this.facing = 'left';
+        else if (dy > 0) this.facing = 'down';
+        else if (dy < 0) this.facing = 'up';
     }
 
     draw(ctx) {
@@ -31,7 +32,14 @@ export default class Player {
     shoot() {
         if (this.bullets > 0) {
             this.bullets--;
-            return new Bullet(this.x, this.y, this.lastDirection.dx, this.lastDirection.dy);
+            let dx = 0, dy = 0;
+            switch (this.facing) {
+                case 'right': dx = 1; break;
+                case 'left': dx = -1; break;
+                case 'down': dy = 1; break;
+                case 'up': dy = -1; break;
+            }
+            return new Bullet(this.x + TILE_SIZE / 2, this.y + TILE_SIZE / 2, dx, dy);
         }
         return null;
     }
@@ -53,6 +61,6 @@ class Bullet {
     }
 
     draw(ctx) {
-        ctx.fillText(this.icon, this.x, this.y + TILE_SIZE);
+        ctx.fillText(this.icon, this.x, this.y);
     }
 }

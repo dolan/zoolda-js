@@ -146,13 +146,15 @@ export default class Game {
                     return false; // Remove bullet if it hits a wall
                 }
                 // Check for collision with enemies
+                let hitEnemy = false;
                 this.enemies = this.enemies.filter(enemy => {
                     if (this.isCollision(bullet.x, bullet.y, 1, 1, enemy.x, enemy.y, enemy.width, enemy.height)) {
+                        hitEnemy = true;
                         return false; // Remove enemy if hit by bullet
                     }
                     return true;
                 });
-                return true; // Keep bullet in the array
+                return !hitEnemy; // Remove bullet if it hit an enemy
             });
 
             // Check if player collects a bullet
