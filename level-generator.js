@@ -64,13 +64,19 @@ export default class LevelGenerator {
 
         // Place enemies
         let numEnemies = Math.floor(Math.random() * 5) + 1; // 1-5 enemies
+        const enemyTypes = [18, 19, 20, 21]; // Goblin, Orc, Demon, Vampire
         for (let i = 0; i < numEnemies; i++) {
-            let enemyX, enemyY;
+            let enemyX, enemyY, enemyType;
             do {
                 enemyX = Math.floor(Math.random() * this.width);
                 enemyY = Math.floor(Math.random() * this.height);
-            } while (level[enemyY][enemyX] !== 0 || (enemyX === startX && enemyY === startY) || (enemyX === endX && enemyY === endY));
-            const enemyType = 18 + Math.floor(Math.random() * 4); // Random enemy type
+                enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            } while (
+                level[enemyY][enemyX] !== 0 || 
+                (enemyX === startX && enemyY === startY) || 
+                (enemyX === endX && enemyY === endY) ||
+                enemies.some(e => e.x === enemyX && e.y === enemyY)
+            );
             level[enemyY][enemyX] = enemyType;
             enemies.push({ x: enemyX, y: enemyY, type: enemyType });
         }
