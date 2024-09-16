@@ -25,6 +25,8 @@ export const TILE_ICONS = {
     19: '👿', // Orc
     20: '😈', // Demon
     21: '🧛', // Vampire
+    22: '🔫', // Bullet
 };
 
 export const WALL_TILE_IDS = [1, 5, 8]; // Trees, mountains, dense forest
+export const BULLET_TILE_ID = 22;

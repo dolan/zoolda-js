@@ -1,5 +1,5 @@
 // level-generator.js
-import { WALL_TILE_IDS } from './Constants.js';
+import { WALL_TILE_IDS, BULLET_TILE_ID } from './Constants.js';
 
 export default class LevelGenerator {
     constructor(width, height) {
@@ -79,10 +79,19 @@ export default class LevelGenerator {
             );
             level[enemyY][enemyX] = enemyType;
             enemies.push({ x: enemyX, y: enemyY, type: enemyType });
-        }
 
-        // Place power-ups (similar to enemies)
-        // ...
+            // Place a bullet for each enemy
+            let bulletX, bulletY;
+            do {
+                bulletX = Math.floor(Math.random() * this.width);
+                bulletY = Math.floor(Math.random() * this.height);
+            } while (
+                level[bulletY][bulletX] !== 0 || 
+                (bulletX === startX && bulletY === startY) || 
+                (bulletX === endX && bulletY === endY)
+            );
+            level[bulletY][bulletX] = BULLET_TILE_ID;
+        }
 
         return { level, startX, startY, endX, endY, enemies }; // Return the level, positions, and enemies
     }

@@ -1,4 +1,4 @@
-import { CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, TILE_ICONS, WALL_TILE_IDS } from './Constants.js';
+import { CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, TILE_ICONS, WALL_TILE_IDS, BULLET_TILE_ID } from './Constants.js';
 import Player from './Player.js';
 import LevelGenerator from './level-generator.js';
 import { Goblin, Orc, Demon, Vampire } from './Enemy.js';
@@ -20,6 +20,7 @@ export default class Game {
         this.message = null;
         this.messageTimeout = null;
         this.gameActive = true;
+        this.bullets = [];
     }
 
     initializeGame() {
@@ -50,8 +51,18 @@ export default class Game {
             if (e.key === 'Enter' && this.message) {
                 this.dismissMessage();
             }
+            if (e.key === ' ') {
+                this.shootBullet();
+            }
         });
         document.addEventListener('keyup', e => delete this.keys[e.key]);
+    }
+
+    shootBullet() {
+        const bullet = this.player.shoot();
+        if (bullet) {
+            this.bullets.push(bullet);
+        }
     }
 
     showMessage(text, duration = 5000) {
@@ -125,6 +136,32 @@ export default class Game {
                     this.gameActive = true;
                 }, 3000);
             }
+
+            // Update bullets
+            this.bullets = this.bullets.filter(bullet => {
+                bullet.move();
+                const tileX = Math.floor(bullet.x / TILE_SIZE);
+                const tileY = Math.floor(bullet.y / TILE_SIZE);
+                if (this.isCollisionWithWall(bullet.x, bullet.y, 1, 1)) {
+                    return false; // Remove bullet if it hits a wall
+                }
+                // Check for collision with enemies
+                this.enemies = this.enemies.filter(enemy => {
+                    if (this.isCollision(bullet.x, bullet.y, 1, 1, enemy.x, enemy.y, enemy.width, enemy.height)) {
+                        return false; // Remove enemy if hit by bullet
+                    }
+                    return true;
+                });
+                return true; // Keep bullet in the array
+            });
+
+            // Check if player collects a bullet
+            const playerTileX = Math.floor(this.player.x / TILE_SIZE);
+            const playerTileY = Math.floor(this.player.y / TILE_SIZE);
+            if (this.level[playerTileY][playerTileX] === BULLET_TILE_ID) {
+                this.player.collectBullet();
+                this.level[playerTileY][playerTileX] = 0; // Remove bullet from level
+            }
         }
     }
 
@@ -156,6 +193,10 @@ export default class Game {
 
         this.player.draw(this.ctx);
         this.enemies.forEach(enemy => enemy.draw(this.ctx));
+        this.bullets.forEach(bullet => bullet.draw(this.ctx));
+
+        // Draw bullet count
+        this.ctx.fillText(`Bullets: ${this.player.bullets}`, 10, 30);
 
         if (this.message) {
             this.drawMessage();
