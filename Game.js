@@ -19,21 +19,29 @@ export default class Game {
 
         this.message = null;
         this.messageTimeout = null;
+        this.gameActive = true;
     }
 
     initializeGame() {
-        const { level, startX, startY, enemies } = this.levelGenerator.generateLevel();
-        this.level = level;
-        this.player = new Player(startX * TILE_SIZE, startY * TILE_SIZE);
-        this.enemies = enemies.map(enemy => {
-            switch(enemy.type) {
-                case 18: return new Goblin(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
-                case 19: return new Orc(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
-                case 20: return new Demon(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
-                case 21: return new Vampire(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
-                default: return null;
+        let validLevel = false;
+        while (!validLevel) {
+            const { level, startX, startY, enemies } = this.levelGenerator.generateLevel();
+            if (this.levelGenerator.hasPathAStar(level, startX, startY, level.findIndex(row => row.includes(17)), level[level.findIndex(row => row.includes(17))].indexOf(17))) {
+                this.level = level;
+                this.player = new Player(startX * TILE_SIZE, startY * TILE_SIZE);
+                this.enemies = enemies.map(enemy => {
+                    switch(enemy.type) {
+                        case 18: return new Goblin(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
+                        case 19: return new Orc(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
+                        case 20: return new Demon(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
+                        case 21: return new Vampire(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE);
+                        default: return null;
+                    }
+                }).filter(enemy => enemy !== null);
+                validLevel = true;
             }
-        }).filter(enemy => enemy !== null);
+        }
+        this.gameActive = true;
     }
 
     setupEventListeners() {
@@ -101,16 +109,19 @@ export default class Game {
     }
 
     update() {
-        this.handleInput();
-        this.enemies.forEach(enemy => enemy.move(this.player, this.level));
-        
-        if (this.isCollisionWithEnemy(this.player.x, this.player.y)) {
-            this.gameOver();
-        }
+        if (this.gameActive) {
+            this.handleInput();
+            this.enemies.forEach(enemy => enemy.move(this.player, this.level));
+            
+            if (this.isCollisionWithEnemy(this.player.x, this.player.y)) {
+                this.gameOver();
+            }
 
-        if (this.isPlayerAtExit()) {
-            this.showMessage("Congratulations! You've reached the exit!", 3000);
-            setTimeout(() => this.initializeGame(), 3000);
+            if (this.isPlayerAtExit()) {
+                this.showMessage("Congratulations! You've reached the exit!", 3000);
+                this.gameActive = false;
+                setTimeout(() => this.initializeGame(), 3000);
+            }
         }
     }
 
@@ -121,8 +132,12 @@ export default class Game {
     }
 
     gameOver() {
+        this.gameActive = false;
         this.showMessage("Game Over! You were caught by an enemy.", 3000);
-        setTimeout(() => this.initializeGame(), 3000);
+        setTimeout(() => {
+            this.initializeGame();
+            this.gameActive = true;
+        }, 3000);
     }
 
     draw() {
