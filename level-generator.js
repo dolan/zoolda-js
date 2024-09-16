@@ -1,4 +1,6 @@
 // level-generator.js
+import { WALL_TILE_IDS } from './Constants.js';
+
 export default class LevelGenerator {
     constructor(width, height) {
         this.width = width;
@@ -122,10 +124,12 @@ export default class LevelGenerator {
                     continue; // Skip if in closed set
                 }
 
-                // Allow movement through walls, but with a higher cost
-                const movementCost = level[neighbor.y][neighbor.x] === 1 ? 5 : 1;
+                const tileType = level[neighbor.y][neighbor.x];
+                if (WALL_TILE_IDS.includes(tileType)) {
+                    continue; // Skip if it's a wall tile
+                }
 
-                const gScore = current.g + movementCost;
+                const gScore = current.g + 1; // All valid moves cost 1
                 const hScore = Math.abs(neighbor.x - endX) + Math.abs(neighbor.y - endY);
                 const fScore = gScore + hScore;
 
