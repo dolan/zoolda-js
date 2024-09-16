@@ -118,9 +118,12 @@ export default class Game {
             }
 
             if (this.isPlayerAtExit()) {
-                this.showMessage("Congratulations! You've reached the exit!", 3000);
                 this.gameActive = false;
-                setTimeout(() => this.initializeGame(), 3000);
+                this.showMessage("Congratulations! You've reached the exit!", 3000);
+                setTimeout(() => {
+                    this.initializeGame();
+                    this.gameActive = true;
+                }, 3000);
             }
         }
     }
