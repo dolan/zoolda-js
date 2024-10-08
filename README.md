@@ -2,6 +2,8 @@
 
 The Leg End of Zoolda is a Roguelike adventure game with a focus on exploration and puzzle-solving.
 
+![Zoolda Screenshot](zoolda-screenshot.jpg)
+
 ## Gameplay
 
 The game is played on a grid of tiles. The player can move around the grid, and the player can also collect crystals. The player can also shoot bullets at enemies.
@@ -20,8 +22,6 @@ This part will evolve in tandem with the game play.
 The game is a normal javascript canvas app that uses a pathfinding algorithm to ensure that each level, 
 though randomly generated, is solvable. The player is represented by a "wizzard" character that can move 
 around the grid. The player can also collect crystals that are scattered about the level. The player has 
-a certain amount of health, and the player can also shoot bullets at enemies. 
-
-
+a certain amount of health, and the player can also shoot bullets at enemies.
 
 
