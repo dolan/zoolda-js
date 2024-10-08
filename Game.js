@@ -13,6 +13,9 @@ export default class Game {
 
         this.requiredCrystals = 0;
         this.levelGenerator = new LevelGenerator(30, 20);
+        this.bulletCountElement = document.getElementById('bullet-count');
+        this.crystalCountElement = document.getElementById('crystal-count');
+        this.requiredCrystalsElement = document.getElementById('required-crystals');
         this.initializeGame();
 
         this.keys = {};
@@ -47,6 +50,7 @@ export default class Game {
             }
         }
         this.gameActive = true;
+        this.updateStatusDisplay();
     }
 
     setupEventListeners() {
@@ -69,6 +73,7 @@ export default class Game {
             this.bullets.push(bullet);
             console.log('Bullet created:', bullet); // Add this for debugging
         }
+        this.updateStatusDisplay();
     }
 
     showMessage(text, duration = 5000) {
@@ -187,6 +192,7 @@ export default class Game {
             if (this.level[playerTileY][playerTileX] === BULLET_TILE_ID) {
                 this.player.collectBullet();
                 this.level[playerTileY][playerTileX] = 0; // Remove bullet from level
+                this.updateStatusDisplay();
             }
 
             // Check if player collects a crystal
@@ -197,6 +203,7 @@ export default class Game {
                     this.exitOpen = true;
                     this.showMessage("Exit is now open!", 2000);
                 }
+                this.updateStatusDisplay();
             }
         }
     }
@@ -230,12 +237,6 @@ export default class Game {
         this.player.draw(this.ctx);
         this.enemies.forEach(enemy => enemy.draw(this.ctx));
         this.bullets.forEach(bullet => bullet.draw(this.ctx));
-
-        // Draw bullet count
-        this.ctx.fillText(`Bullets: ${this.player.bullets}`, 10, 30);
-
-        // Draw crystal count
-        this.ctx.fillText(`Crystals: ${this.player.crystals}/${this.requiredCrystals}`, 10, 60);
 
         if (this.message) {
             this.drawMessage();
@@ -277,5 +278,11 @@ export default class Game {
 
     start() {
         this.gameLoop();
+    }
+
+    updateStatusDisplay() {
+        this.bulletCountElement.textContent = this.player.bullets;
+        this.crystalCountElement.textContent = this.player.crystals;
+        this.requiredCrystalsElement.textContent = this.requiredCrystals;
     }
 }
