@@ -1,10 +1,11 @@
 // level-generator.js
-import { WALL_TILE_IDS, BULLET_TILE_ID } from './Constants.js';
+import { WALL_TILE_IDS, BULLET_TILE_ID, CRYSTAL_TILE_ID } from './constants.js';
 
 export default class LevelGenerator {
     constructor(width, height) {
         this.width = width;
         this.height = height;
+        this.requiredCrystals = 0;
     }
 
     generateLevel() {
@@ -93,7 +94,22 @@ export default class LevelGenerator {
             level[bulletY][bulletX] = BULLET_TILE_ID;
         }
 
-        return { level, startX, startY, endX, endY, enemies }; // Return the level, positions, and enemies
+        // Place crystals
+        this.requiredCrystals = Math.floor(Math.random() * 3) + 3; // 3-5 crystals
+        for (let i = 0; i < this.requiredCrystals; i++) {
+            let crystalX, crystalY;
+            do {
+                crystalX = Math.floor(Math.random() * this.width);
+                crystalY = Math.floor(Math.random() * this.height);
+            } while (
+                level[crystalY][crystalX] !== 0 || 
+                (crystalX === startX && crystalY === startY) || 
+                (crystalX === endX && crystalY === endY)
+            );
+            level[crystalY][crystalX] = CRYSTAL_TILE_ID;
+        }
+
+        return { level, startX, startY, endX, endY, enemies, requiredCrystals: this.requiredCrystals };
     }
 
     /**

@@ -1,4 +1,4 @@
-import { TILE_SIZE } from './Constants.js';
+import { TILE_SIZE } from './constants.js';
 
 class Enemy {
     constructor(x, y, type) {

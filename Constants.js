@@ -26,7 +26,8 @@ export const TILE_ICONS = {
     20: '😈', // Demon
     21: '🧛', // Vampire
     22: '🔫', // Bullet
+    23: '💎', // Crystal
 };
-
 export const WALL_TILE_IDS = [1, 5, 8]; // Trees, mountains, dense forest
 export const BULLET_TILE_ID = 22;
+export const CRYSTAL_TILE_ID = 23;

@@ -1,4 +1,4 @@
-import { TILE_SIZE, BULLET_TILE_ID } from './Constants.js';
+import { TILE_SIZE, BULLET_TILE_ID } from './constants.js';
 
 export default class Player {
     constructor(x, y) {
@@ -10,6 +10,7 @@ export default class Player {
         this.speed = 5;
         this.bullets = 0;
         this.facing = 'right'; // Default facing direction
+        this.crystals = 0;
     }
 
     move(dx, dy) {
@@ -27,6 +28,10 @@ export default class Player {
 
     collectBullet() {
         this.bullets++;
+    }
+
+    collectCrystal() {
+        this.crystals++;
     }
 
     shoot() {

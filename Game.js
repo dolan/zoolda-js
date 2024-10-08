@@ -1,7 +1,7 @@
-import { CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, TILE_ICONS, WALL_TILE_IDS, BULLET_TILE_ID } from './Constants.js';
-import Player from './Player.js';
+import { CANVAS_WIDTH, CANVAS_HEIGHT, TILE_SIZE, TILE_ICONS, WALL_TILE_IDS, BULLET_TILE_ID, CRYSTAL_TILE_ID } from './constants.js';
+import Player from './player.js';
 import LevelGenerator from './level-generator.js';
-import { Goblin, Orc, Demon, Vampire } from './Enemy.js';
+import { Goblin, Orc, Demon, Vampire } from './enemy.js';
 
 export default class Game {
     constructor(canvas) {
@@ -21,13 +21,15 @@ export default class Game {
         this.messageTimeout = null;
         this.gameActive = true;
         this.bullets = [];
+        this.requiredCrystals = 0;
+        this.exitOpen = false;
     }
 
     initializeGame() {
         let validLevel = false;
         while (!validLevel) {
-            const { level, startX, startY, enemies } = this.levelGenerator.generateLevel();
-            if (this.levelGenerator.hasPathAStar(level, startX, startY, level.findIndex(row => row.includes(17)), level[level.findIndex(row => row.includes(17))].indexOf(17))) {
+            const { level, startX, startY, endX, endY, enemies, requiredCrystals } = this.levelGenerator.generateLevel();
+            if (this.levelGenerator.hasPathAStar(level, startX, startY, endX, endY)) {
                 this.level = level;
                 this.player = new Player(startX * TILE_SIZE, startY * TILE_SIZE);
                 this.enemies = enemies.map(enemy => {
@@ -39,6 +41,8 @@ export default class Game {
                         default: return null;
                     }
                 }).filter(enemy => enemy !== null);
+                this.requiredCrystals = requiredCrystals;
+                this.exitOpen = false;
                 validLevel = true;
             }
         }
@@ -151,7 +155,10 @@ export default class Game {
             }
 
             // Update bullets
-            console.log('Updating bullets. Count:', this.bullets.length);
+
+            if (this.bullets.length > 0) {
+                console.log('Updating bullets. Count:', this.bullets.length);
+            }
             this.bullets = this.bullets.filter(bullet => {
                 bullet.move();
                 
@@ -181,13 +188,23 @@ export default class Game {
                 this.player.collectBullet();
                 this.level[playerTileY][playerTileX] = 0; // Remove bullet from level
             }
+
+            // Check if player collects a crystal
+            if (this.level[playerTileY][playerTileX] === CRYSTAL_TILE_ID) {
+                this.player.collectCrystal();
+                this.level[playerTileY][playerTileX] = 0; // Remove crystal from level
+                if (this.player.crystals === this.requiredCrystals) {
+                    this.exitOpen = true;
+                    this.showMessage("Exit is now open!", 2000);
+                }
+            }
         }
     }
 
     isPlayerAtExit() {
         const playerTileX = Math.floor(this.player.x / TILE_SIZE);
         const playerTileY = Math.floor(this.player.y / TILE_SIZE);
-        return this.level[playerTileY][playerTileX] === 17; // 17 is the exit tile
+        return this.level[playerTileY][playerTileX] === 17 && this.exitOpen;
     }
 
     gameOver() {
@@ -216,6 +233,9 @@ export default class Game {
 
         // Draw bullet count
         this.ctx.fillText(`Bullets: ${this.player.bullets}`, 10, 30);
+
+        // Draw crystal count
+        this.ctx.fillText(`Crystals: ${this.player.crystals}/${this.requiredCrystals}`, 10, 60);
 
         if (this.message) {
             this.drawMessage();
