@@ -9,13 +9,127 @@ export default class LevelGenerator {
     }
 
     generateLevel() {
-        let level = this.generateBasicLevel();
-        let { startX, startY, endX, endY } = this.placeStartAndEnd(level);
-        let enemies = this.placeEnemies(level, startX, startY, endX, endY);
-        this.placeBullets(level, startX, startY, endX, endY);
-        this.placeCrystals(level, startX, startY, endX, endY);
+        let level, startX, startY, endX, endY, enemies;
+        let isPathValid = false;
+        let attempts = 0;
+        const maxAttempts = 100;
+
+        while (!isPathValid && attempts < maxAttempts) {
+            level = this.generateComplexLevel();
+            ({ startX, startY, endX, endY } = this.placeStartAndEnd(level));
+            enemies = this.placeEnemies(level, startX, startY, endX, endY);
+            this.placeBullets(level, startX, startY, endX, endY);
+            this.placeCrystals(level, startX, startY, endX, endY);
+
+            // Check if there's a valid path from start to end
+            isPathValid = this.hasPathAStar(level, startX, startY, endX, endY);
+            attempts++;
+        }
+
+        if (!isPathValid) {
+            console.error('Failed to generate a valid level after maximum attempts');
+            // Generate a simpler level as a fallback
+            level = this.generateSimpleFallbackLevel();
+            startX = 1;
+            startY = 1;
+            endX = this.width - 2;
+            endY = this.height - 2;
+            this.placeCrystals(level, startX, startY, endX, endY);
+        }
 
         return { level, startX, startY, endX, endY, enemies, requiredCrystals: this.requiredCrystals };
+    }
+
+    generateComplexLevel() {
+        const level = [];
+        for (let y = 0; y < this.height; y++) {
+            level[y] = [];
+            for (let x = 0; x < this.width; x++) {
+                if (x === 0 || x === this.width - 1 || y === 0 || y === this.height - 1) {
+                    // Place walls around the edges
+                    level[y][x] = WALL_TILE_IDS[Math.floor(Math.random() * WALL_TILE_IDS.length)];
+                } else {
+                    // Randomly place obstacles (trees, rocks) or empty spaces
+                    level[y][x] = Math.random() < 0.2 ? WALL_TILE_IDS[Math.floor(Math.random() * WALL_TILE_IDS.length)] : 0;
+                }
+            }
+        }
+        return level;
+    }
+
+    placeStartAndEnd(level) {
+        let startX, startY, endX, endY;
+        do {
+            startX = Math.floor(Math.random() * (this.width - 2)) + 1;
+            startY = Math.floor(Math.random() * (this.height - 2)) + 1;
+            endX = Math.floor(Math.random() * (this.width - 2)) + 1;
+            endY = Math.floor(Math.random() * (this.height - 2)) + 1;
+        } while (startX === endX && startY === endY || level[startY][startX] !== 0 || level[endY][endX] !== 0);
+        
+        level[startY][startX] = 0; // Ensure start is empty
+        level[endY][endX] = 17; // Use a specific tile for the exit (e.g., 17)
+        return { startX, startY, endX, endY };
+    }
+
+    placeEnemies(level, startX, startY, endX, endY) {
+        let numEnemies = Math.floor(Math.random() * 5) + 1; // 1-5 enemies
+        const enemyTypes = [18, 19, 20, 21]; // Goblin, Orc, Demon, Vampire
+        let enemies = [];
+        for (let i = 0; i < numEnemies; i++) {
+            let enemyX, enemyY, enemyType;
+            do {
+                enemyX = Math.floor(Math.random() * this.width);
+                enemyY = Math.floor(Math.random() * this.height);
+                enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            } while (
+                level[enemyY][enemyX] !== 0 || 
+                (enemyX === startX && enemyY === startY) || 
+                (enemyX === endX && enemyY === endY) ||
+                enemies.some(e => e.x === enemyX && e.y === enemyY)
+            );
+            level[enemyY][enemyX] = enemyType;
+            enemies.push({ x: enemyX, y: enemyY, type: enemyType });
+        }
+        return enemies;
+    }
+
+    placeBullets(level, startX, startY, endX, endY) {
+        let numBullets = Math.floor(Math.random() * 5) + 1; // 1-5 bullets
+        for (let i = 0; i < numBullets; i++) {
+            let bulletX, bulletY;
+            do {
+                bulletX = Math.floor(Math.random() * this.width);
+                bulletY = Math.floor(Math.random() * this.height);
+            } while (
+                level[bulletY][bulletX] !== 0 || 
+                (bulletX === startX && bulletY === startY) || 
+                (bulletX === endX && bulletY === endY)
+            );
+            level[bulletY][bulletX] = BULLET_TILE_ID;
+        }
+    }
+
+    placeCrystals(level, startX, startY, endX, endY) {
+        // Calculate a reasonable number of required crystals based on level size
+        const levelArea = this.width * this.height;
+        const baseCrystals = 3; // Minimum number of crystals
+        const maxAdditionalCrystals = Math.floor(levelArea / (10 * TILE_SIZE)); // Scale with level size
+        this.requiredCrystals = baseCrystals + Math.floor(Math.random() * (maxAdditionalCrystals + 1));
+
+        console.log(`Generating ${this.requiredCrystals} crystals`);
+
+        for (let i = 0; i < this.requiredCrystals; i++) {
+            let crystalX, crystalY;
+            do {
+                crystalX = Math.floor(Math.random() * this.width);
+                crystalY = Math.floor(Math.random() * this.height);
+            } while (
+                level[crystalY][crystalX] !== 0 || 
+                (crystalX === startX && crystalY === startY) || 
+                (crystalX === endX && crystalY === endY)
+            );
+            level[crystalY][crystalX] = CRYSTAL_TILE_ID;
+        }
     }
 
     /**
@@ -104,78 +218,5 @@ export default class LevelGenerator {
 
     loadLevel(json) {
         return JSON.parse(json);
-    }
-
-    placeStartAndEnd(level) {
-        let startX, startY, endX, endY;
-        do {
-            startX = Math.floor(Math.random() * this.width);
-            startY = Math.floor(Math.random() * this.height);
-            endX = Math.floor(Math.random() * this.width);
-            endY = Math.floor(Math.random() * this.height);
-        } while (startX === endX && startY === endY);
-        level[endY][endX] = 17; // Use a specific tile for the exit (e.g., 17)
-        return { startX, startY, endX, endY };
-    }
-
-    placeEnemies(level, startX, startY, endX, endY) {
-        let numEnemies = Math.floor(Math.random() * 5) + 1; // 1-5 enemies
-        const enemyTypes = [18, 19, 20, 21]; // Goblin, Orc, Demon, Vampire
-        let enemies = [];
-        for (let i = 0; i < numEnemies; i++) {
-            let enemyX, enemyY, enemyType;
-            do {
-                enemyX = Math.floor(Math.random() * this.width);
-                enemyY = Math.floor(Math.random() * this.height);
-                enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-            } while (
-                level[enemyY][enemyX] !== 0 || 
-                (enemyX === startX && enemyY === startY) || 
-                (enemyX === endX && enemyY === endY) ||
-                enemies.some(e => e.x === enemyX && e.y === enemyY)
-            );
-            level[enemyY][enemyX] = enemyType;
-            enemies.push({ x: enemyX, y: enemyY, type: enemyType });
-        }
-        return enemies;
-    }
-
-    placeBullets(level, startX, startY, endX, endY) {
-        let numBullets = Math.floor(Math.random() * 5) + 1; // 1-5 bullets
-        for (let i = 0; i < numBullets; i++) {
-            let bulletX, bulletY;
-            do {
-                bulletX = Math.floor(Math.random() * this.width);
-                bulletY = Math.floor(Math.random() * this.height);
-            } while (
-                level[bulletY][bulletX] !== 0 || 
-                (bulletX === startX && bulletY === startY) || 
-                (bulletX === endX && bulletY === endY)
-            );
-            level[bulletY][bulletX] = BULLET_TILE_ID;
-        }
-    }
-
-    placeCrystals(level, startX, startY, endX, endY) {
-        // Calculate a reasonable number of required crystals based on level size
-        const levelArea = this.width * this.height;
-        const baseCrystals = 3; // Minimum number of crystals
-        const maxAdditionalCrystals = Math.floor(levelArea / (10 * TILE_SIZE)); // Scale with level size
-        this.requiredCrystals = baseCrystals + Math.floor(Math.random() * (maxAdditionalCrystals + 1));
-
-        console.log(`Generating ${this.requiredCrystals} crystals`);
-
-        for (let i = 0; i < this.requiredCrystals; i++) {
-            let crystalX, crystalY;
-            do {
-                crystalX = Math.floor(Math.random() * this.width);
-                crystalY = Math.floor(Math.random() * this.height);
-            } while (
-                level[crystalY][crystalX] !== 0 || 
-                (crystalX === startX && crystalY === startY) || 
-                (crystalX === endX && crystalY === endY)
-            );
-            level[crystalY][crystalX] = CRYSTAL_TILE_ID;
-        }
     }
 }
