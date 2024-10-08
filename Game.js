@@ -11,6 +11,7 @@ export default class Game {
         this.canvas.height = CANVAS_HEIGHT;
         this.ctx.font = "32px Arial";
 
+        this.requiredCrystals = 0;
         this.levelGenerator = new LevelGenerator(30, 20);
         this.initializeGame();
 
@@ -21,7 +22,6 @@ export default class Game {
         this.messageTimeout = null;
         this.gameActive = true;
         this.bullets = [];
-        this.requiredCrystals = 0;
         this.exitOpen = false;
     }
 
