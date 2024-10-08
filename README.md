@@ -4,6 +4,10 @@ The Leg End of Zoolda is a Roguelike adventure game with a focus on exploration 
 
 ![Zoolda Screenshot](zoolda-screenshot.jpg)
 
+## Demo
+
+[Play the game here on GitHub Pages](https://dolan.github.io/zoolda-js/index.html)
+
 ## Gameplay
 
 The game is played on a grid of tiles. The player can move around the grid, and the player can also collect crystals. The player can also shoot bullets at enemies.
