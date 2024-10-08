@@ -32,35 +32,35 @@ export default class Player {
     shoot() {
         if (this.bullets > 0) {
             this.bullets--;
-            let dx = 0, dy = 0;
-            switch (this.facing) {
-                case 'right': dx = 1; break;
-                case 'left': dx = -1; break;
-                case 'down': dy = 1; break;
-                case 'up': dy = -1; break;
-            }
-            return new Bullet(this.x + TILE_SIZE / 2, this.y + TILE_SIZE / 2, dx, dy);
+            console.log('Player shooting. Direction:', this.direction);
+            return new Bullet(this.x + this.width / 2, this.y + this.height / 2, this.direction);
         }
         return null;
     }
 }
 
 class Bullet {
-    constructor(x, y, dx, dy) {
+    constructor(x, y, direction) {
         this.x = x;
         this.y = y;
-        this.dx = dx;
-        this.dy = dy;
-        this.speed = 10;
-        this.icon = '•';
+        this.direction = direction;
+        this.speed = 5; // Adjust as needed
+        this.width = 5; // Adjust as needed
+        this.height = 5; // Adjust as needed
     }
 
     move() {
-        this.x += this.dx * this.speed;
-        this.y += this.dy * this.speed;
+        // Update bullet position based on direction
+        switch(this.direction) {
+            case 'up': this.y -= this.speed; break;
+            case 'down': this.y += this.speed; break;
+            case 'left': this.x -= this.speed; break;
+            case 'right': this.x += this.speed; break;
+        }
     }
 
     draw(ctx) {
-        ctx.fillText(this.icon, this.x, this.y);
+        ctx.fillStyle = 'yellow';
+        ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 }

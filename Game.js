@@ -53,6 +53,7 @@ export default class Game {
             }
             if (e.key === ' ') {
                 this.shootBullet();
+                console.log('Spacebar pressed, shootBullet called'); // Add this for debugging
             }
         });
         document.addEventListener('keyup', e => delete this.keys[e.key]);
@@ -62,6 +63,7 @@ export default class Game {
         const bullet = this.player.shoot();
         if (bullet) {
             this.bullets.push(bullet);
+            console.log('Bullet created:', bullet); // Add this for debugging
         }
     }
 
@@ -82,10 +84,22 @@ export default class Game {
     }
 
     handleInput() {
-        if (this.keys['ArrowLeft']) this.movePlayer(-this.player.speed, 0);
-        if (this.keys['ArrowRight']) this.movePlayer(this.player.speed, 0);
-        if (this.keys['ArrowUp']) this.movePlayer(0, -this.player.speed);
-        if (this.keys['ArrowDown']) this.movePlayer(0, this.player.speed);
+        if (this.keys['ArrowLeft']) {
+            this.movePlayer(-this.player.speed, 0);
+            this.player.direction = 'left';
+        }
+        if (this.keys['ArrowRight']) {
+            this.movePlayer(this.player.speed, 0);
+            this.player.direction = 'right';
+        }
+        if (this.keys['ArrowUp']) {
+            this.movePlayer(0, -this.player.speed);
+            this.player.direction = 'up';
+        }
+        if (this.keys['ArrowDown']) {
+            this.movePlayer(0, this.player.speed);
+            this.player.direction = 'down';
+        }
     }
 
     movePlayer(dx, dy) {
@@ -109,13 +123,12 @@ export default class Game {
     }
 
     isCollisionWithEnemy(x, y) {
-        const playerRadius = TILE_SIZE / 2;
-        const enemyRadius = TILE_SIZE * 0.75; // Larger collision radius for enemies
+        const radius = (x === this.player.x && y === this.player.y) ? TILE_SIZE / 2 : 1; // Use smaller radius for bullets
         return this.enemies.some(enemy => {
-            const dx = enemy.x + TILE_SIZE / 2 - (x + playerRadius);
-            const dy = enemy.y + TILE_SIZE / 2 - (y + playerRadius);
+            const dx = enemy.x + TILE_SIZE / 2 - (x + radius);
+            const dy = enemy.y + TILE_SIZE / 2 - (y + radius);
             const distance = Math.sqrt(dx * dx + dy * dy);
-            return distance < playerRadius + enemyRadius;
+            return distance < radius + TILE_SIZE * 0.75; // 0.75 is the enemy collision radius factor
         });
     }
 
@@ -138,22 +151,26 @@ export default class Game {
             }
 
             // Update bullets
+            console.log('Updating bullets. Count:', this.bullets.length);
             this.bullets = this.bullets.filter(bullet => {
                 bullet.move();
-                const tileX = Math.floor(bullet.x / TILE_SIZE);
-                const tileY = Math.floor(bullet.y / TILE_SIZE);
+                
                 if (this.isCollisionWithWall(bullet.x, bullet.y, 1, 1)) {
+                    console.log('Bullet hit wall');
                     return false; // Remove bullet if it hits a wall
                 }
+                
                 // Check for collision with enemies
                 let hitEnemy = false;
                 this.enemies = this.enemies.filter(enemy => {
-                    if (this.isCollision(bullet.x, bullet.y, 1, 1, enemy.x, enemy.y, enemy.width, enemy.height)) {
+                    if (this.isCollisionWithEnemy(bullet.x, bullet.y)) {
                         hitEnemy = true;
+                        console.log('Bullet hit enemy');
                         return false; // Remove enemy if hit by bullet
                     }
                     return true;
                 });
+                
                 return !hitEnemy; // Remove bullet if it hit an enemy
             });
 
