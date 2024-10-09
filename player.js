@@ -49,9 +49,9 @@ class Bullet {
         this.x = x;
         this.y = y;
         this.direction = direction;
-        this.speed = 5; // Adjust as needed
-        this.width = 5; // Adjust as needed
-        this.height = 5; // Adjust as needed
+        this.speed = 9; // Adjust as needed
+        this.width = 9; // Adjust as needed
+        this.height = 9; // Adjust as needed
     }
 
     move() {
@@ -65,7 +65,7 @@ class Bullet {
     }
 
     draw(ctx) {
-        ctx.fillStyle = 'yellow';
+        ctx.fillStyle = 'red';
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 }

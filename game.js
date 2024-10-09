@@ -26,6 +26,7 @@ export default class Game {
         this.gameActive = true;
         this.bullets = [];
         this.exitOpen = false;
+        this.monsterPositions = []; // Add this line
     }
 
     initializeGame() {
@@ -33,7 +34,9 @@ export default class Game {
         while (!validLevel) {
             const { level, startX, startY, endX, endY, enemies, requiredCrystals } = this.levelGenerator.generateLevel();
             if (this.levelGenerator.hasPathAStar(level, startX, startY, endX, endY)) {
-                this.level = level;
+                this.level = level.map(row => row.map(tile => 
+                    (tile >= 18 && tile <= 21) ? 0 : tile
+                )); // Remove monsters from level data
                 this.player = new Player(startX * TILE_SIZE, startY * TILE_SIZE);
                 this.enemies = enemies.map(enemy => {
                     switch(enemy.type) {
@@ -44,6 +47,11 @@ export default class Game {
                         default: return null;
                     }
                 }).filter(enemy => enemy !== null);
+                this.monsterPositions = this.enemies.map(enemy => ({
+                    x: Math.floor(enemy.x / TILE_SIZE),
+                    y: Math.floor(enemy.y / TILE_SIZE),
+                    type: this.getEnemyTileId(enemy)
+                }));
                 this.requiredCrystals = requiredCrystals;
                 this.exitOpen = false;
                 validLevel = true;
@@ -144,21 +152,22 @@ export default class Game {
     update() {
         if (this.gameActive) {
             this.handleInput();
+            
+            // Update monster positions
+            this.enemies.forEach((enemy, index) => {
+                enemy.move(this.player, this.level);
+                this.monsterPositions[index] = {
+                    x: Math.floor(enemy.x / TILE_SIZE),
+                    y: Math.floor(enemy.y / TILE_SIZE),
+                    type: this.getEnemyTileId(enemy)
+                };
+            });
+
+            this.checkExit(); // Make sure this is called in the update method
+
+            // Move enemies
             this.enemies.forEach(enemy => enemy.move(this.player, this.level));
             
-            if (this.isCollisionWithEnemy(this.player.x, this.player.y)) {
-                this.gameOver();
-            }
-
-            if (this.isPlayerAtExit()) {
-                this.gameActive = false;
-                this.showMessage("Congratulations! You've reached the exit!", 3000);
-                setTimeout(() => {
-                    this.initializeGame();
-                    this.gameActive = true;
-                }, 3000);
-            }
-
             // Update bullets
 
             if (this.bullets.length > 0) {
@@ -208,24 +217,10 @@ export default class Game {
         }
     }
 
-    isPlayerAtExit() {
-        const playerTileX = Math.floor(this.player.x / TILE_SIZE);
-        const playerTileY = Math.floor(this.player.y / TILE_SIZE);
-        return this.level[playerTileY][playerTileX] === 17 && this.exitOpen;
-    }
-
-    gameOver() {
-        this.gameActive = false;
-        this.showMessage("Game Over! You were caught by an enemy.", 3000);
-        setTimeout(() => {
-            this.initializeGame();
-            this.gameActive = true;
-        }, 3000);
-    }
-
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+        // Draw the level
         for (let y = 0; y < this.level.length; y++) {
             for (let x = 0; x < this.level[y].length; x++) {
                 const tileId = this.level[y][x];
@@ -233,6 +228,12 @@ export default class Game {
                 this.ctx.fillText(tileIcon, x * TILE_SIZE, y * TILE_SIZE + TILE_SIZE);
             }
         }
+
+        // Draw monsters
+        this.monsterPositions.forEach(monster => {
+            const tileIcon = TILE_ICONS[monster.type];
+            this.ctx.fillText(tileIcon, monster.x * TILE_SIZE, monster.y * TILE_SIZE + TILE_SIZE);
+        });
 
         this.player.draw(this.ctx);
         this.enemies.forEach(enemy => enemy.draw(this.ctx));
@@ -284,5 +285,44 @@ export default class Game {
         this.bulletCountElement.textContent = this.player.bullets;
         this.crystalCountElement.textContent = this.player.crystals;
         this.requiredCrystalsElement.textContent = this.requiredCrystals;
+    }
+
+    getEnemyTileId(enemy) {
+        if (enemy instanceof Goblin) return 18;
+        if (enemy instanceof Orc) return 19;
+        if (enemy instanceof Demon) return 20;
+        if (enemy instanceof Vampire) return 21;
+        return 0;
+    }
+
+    isPlayerAtExit() {
+        const playerTileX = Math.floor(this.player.x / TILE_SIZE);
+        const playerTileY = Math.floor(this.player.y / TILE_SIZE);
+        return this.level[playerTileY][playerTileX] === 17 && this.exitOpen;
+    }
+
+    gameOver() {
+        this.gameActive = false;
+        this.showMessage("Game Over! You were caught by an enemy.", 3000);
+        setTimeout(() => {
+            this.initializeGame();
+            this.gameActive = true;
+        }, 3000);
+    }
+
+    checkExit() {
+        const playerTileX = Math.floor(this.player.x / TILE_SIZE);
+        const playerTileY = Math.floor(this.player.y / TILE_SIZE);
+        
+        // Check if the player is on the exit tile
+        if (this.level[playerTileY][playerTileX] === 17) { // Assuming 3 is the exit tile ID
+            if (this.exitOpen) {
+                this.gameActive = false;
+                this.message = "You escaped! You win!";
+            } else {
+                this.message = `Collect ${this.requiredCrystals} crystals to open the exit!`;
+                setTimeout(() => this.message = null, 2000);
+            }
+        }
     }
 }
