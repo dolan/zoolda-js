@@ -1,6 +1,70 @@
 // level-generator.js
 import { WALL_TILE_IDS, BULLET_TILE_ID, CRYSTAL_TILE_ID, TILE_SIZE } from './constants.js';
 
+class Oval {
+  constructor(x, y, width, height, isWalkable, fillRate = 0.7) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.isWalkable = isWalkable;
+    this.fillRate = fillRate;
+  }
+
+  isInside(x, y) {
+    const normalizedX = (x - this.x - this.width / 2) / (this.width / 2);
+    const normalizedY = (y - this.y - this.height / 2) / (this.height / 2);
+    return (normalizedX * normalizedX + normalizedY * normalizedY <= 1) && Math.random() < this.fillRate;
+  }
+}
+
+function generateLevel(width, height) {
+  const level = [];
+  const masks = [
+    new Oval(0, 0, 10, 10, false), // Non-walkable oval at 0,0 with size 10x10
+    new Oval(15, 15, 20, 20, true, 0.9), // Walkable oval at 15,15 with size 20x20 and higher fill rate
+    new Oval(40, 5, 15, 30, false, 0.6), // Non-walkable oval at 40,5 with size 15x30 and lower fill rate
+    // Add more masks as needed
+  ];
+
+  // First phase: Generate non-walkable areas
+  for (let y = 0; y < height; y++) {
+    const row = [];
+    for (let x = 0; x < width; x++) {
+      let isNonWalkable = false;
+      for (const mask of masks) {
+        if (!mask.isWalkable && mask.isInside(x, y)) {
+          isNonWalkable = true;
+          break;
+        }
+      }
+      row.push(isNonWalkable ? 1 : null);
+    }
+    level.push(row);
+  }
+
+  // Second phase: Generate walkable areas
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (level[y][x] === null) {
+        let isWalkable = false;
+        for (const mask of masks) {
+          if (mask.isWalkable && mask.isInside(x, y)) {
+            isWalkable = true;
+            break;
+          }
+        }
+        level[y][x] = isWalkable ? 0 : (Math.random() < 0.8 ? 0 : 1);
+      }
+    }
+  }
+
+  // Third phase: Populate enemies and items
+  // ... existing enemy and item placement code ...
+
+  return level;
+}
+
 export default class LevelGenerator {
     constructor(width, height) {
         this.width = width;
