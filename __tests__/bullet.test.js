@@ -1,4 +1,5 @@
 import Bullet from '../bullet.js';
+import { jest } from '@jest/globals';
 
 describe('Bullet', () => {
   let bullet;

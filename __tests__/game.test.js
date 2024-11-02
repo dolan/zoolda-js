@@ -1,4 +1,5 @@
 import Game from '../game.js';
+import { jest } from '@jest/globals';
 
 describe('Game', () => {
   let game;

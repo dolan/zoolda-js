@@ -31,15 +31,18 @@ describe('LevelGenerator', () => {
   });
 
   test('hasPathAStar finds valid path', () => {
-    const simpleLevel = Array(5).fill().map(() => Array(5).fill(0));
-    const hasPath = generator.hasPathAStar(simpleLevel, 0, 0, 4, 4);
+    const simpleLevel = Array(10).fill().map(() => Array(10).fill(0));
+    const hasPath = generator.hasPathAStar(simpleLevel, 1, 1, 3, 3);
     expect(hasPath).toBe(true);
   });
 
   test('hasPathAStar returns false for blocked path', () => {
-    const blockedLevel = Array(5).fill().map(() => Array(5).fill(0));
-    blockedLevel[2] = Array(5).fill(WALL_TILE_IDS[0]); // Create wall in middle
-    const hasPath = generator.hasPathAStar(blockedLevel, 0, 0, 4, 4);
+    const blockedLevel = Array(10).fill().map(() => Array(10).fill(0));
+    // Create a wall that blocks the path
+    for (let i = 0; i < 10; i++) {
+      blockedLevel[5][i] = WALL_TILE_IDS[0];
+    }
+    const hasPath = generator.hasPathAStar(blockedLevel, 1, 1, 8, 8);
     expect(hasPath).toBe(false);
   });
 

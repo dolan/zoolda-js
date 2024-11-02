@@ -1,5 +1,6 @@
 import Player from '../player.js';
 import { TILE_SIZE } from '../constants.js';
+import { jest } from '@jest/globals';
 
 describe('Player', () => {
   let player;
