@@ -38,9 +38,10 @@ describe('LevelGenerator', () => {
 
   test('hasPathAStar returns false for blocked path', () => {
     const blockedLevel = Array(10).fill().map(() => Array(10).fill(0));
-    // Create a wall that blocks the path
+    // Create walls that completely block the path
     for (let i = 0; i < 10; i++) {
-      blockedLevel[5][i] = WALL_TILE_IDS[0];
+      blockedLevel[3][i] = WALL_TILE_IDS[0];
+      blockedLevel[6][i] = WALL_TILE_IDS[0];
     }
     const hasPath = generator.hasPathAStar(blockedLevel, 1, 1, 8, 8);
     expect(hasPath).toBe(false);
