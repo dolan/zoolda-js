@@ -1,16 +1,1 @@
-{
-  "name": "zoolda",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "The Leg End of Zoolda is a Roguelike adventure game with a focus on exploration and puzzle-solving.",
-  "main": "constants.js",
-  "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "jest": "^29.7.0"
-  }
-}
+{ "type": "module", "scripts": { "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js" } }
