@@ -5,12 +5,12 @@ describe('LevelGenerator', () => {
   let generator;
 
   beforeEach(() => {
-    generator = new LevelGenerator(30, 20);
+    generator = new LevelGenerator(10, 10); // Use smaller size for tests
   });
 
   test('constructor sets initial properties', () => {
-    expect(generator.width).toBe(30);
-    expect(generator.height).toBe(20);
+    expect(generator.width).toBe(10);
+    expect(generator.height).toBe(10);
     expect(generator.requiredCrystals).toBe(0);
   });
 
@@ -38,12 +38,11 @@ describe('LevelGenerator', () => {
 
   test('hasPathAStar returns false for blocked path', () => {
     const blockedLevel = Array(10).fill().map(() => Array(10).fill(0));
-    // Create walls that completely block the path
-    for (let i = 0; i < 10; i++) {
-      blockedLevel[3][i] = WALL_TILE_IDS[0];
-      blockedLevel[6][i] = WALL_TILE_IDS[0];
+    // Create a complete horizontal wall in the middle
+    for (let x = 0; x < 10; x++) {
+      blockedLevel[5][x] = WALL_TILE_IDS[0];
     }
-    const hasPath = generator.hasPathAStar(blockedLevel, 1, 1, 8, 8);
+    const hasPath = generator.hasPathAStar(blockedLevel, 1, 1, 1, 8);
     expect(hasPath).toBe(false);
   });
 

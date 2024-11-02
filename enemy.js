@@ -1,6 +1,6 @@
 import { TILE_SIZE } from './constants.js';
 
-class Enemy {
+export class Enemy {
     constructor(x, y, type) {
         this.x = x;
         this.y = y;
@@ -112,21 +112,25 @@ export class Vampire extends Enemy {
     }
 
     move(player, level) {
-        super.move(player, level);
-        // Vampires avoid the player when detected
-        if (this.moveCounter === 0) {
-            const dx = this.x - player.x;
-            const dy = this.y - player.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance <= this.detectionRadius) {
-                const angle = Math.atan2(dy, dx);
-                const newX = this.x + Math.cos(angle) * this.speed;
-                const newY = this.y + Math.sin(angle) * this.speed;
-                if (!this.isCollision(newX, newY, level)) {
-                    this.x = newX;
-                    this.y = newY;
-                }
+        this.moveCounter++;
+        if (this.moveCounter < this.moveInterval) return;
+        this.moveCounter = 0;
+
+        const dx = this.x - player.x;
+        const dy = this.y - player.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance <= this.detectionRadius) {
+            // Move away from player when detected
+            const angle = Math.atan2(dy, dx);
+            const newX = this.x + Math.cos(angle) * this.speed;
+            const newY = this.y + Math.sin(angle) * this.speed;
+            if (!this.isCollision(newX, newY, level)) {
+                this.x = newX;
+                this.y = newY;
             }
+        } else {
+            this.moveRandomly(level);
         }
     }
 }

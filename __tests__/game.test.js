@@ -7,6 +7,14 @@ describe('Game', () => {
   let mockCtx;
 
   beforeEach(() => {
+    // Mock DOM elements
+    document.body.innerHTML = `
+      <div id="bullet-count"></div>
+      <div id="crystal-count"></div>
+      <div id="required-crystals"></div>
+      <div id="message"></div>
+    `;
+
     mockCtx = {
       clearRect: jest.fn(),
       fillText: jest.fn(),

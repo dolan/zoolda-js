@@ -86,17 +86,32 @@ describe('Enemy Classes', () => {
     });
 
     test('move includes avoidance behavior', () => {
-      vampire.moveCounter = vampire.moveInterval - 1;
-      mockPlayer.x = vampire.x - (vampire.detectionRadius / 2); // Player is within detection range
+      // Reset moveCounter to ensure movement happens
+      vampire.moveCounter = vampire.moveInterval;
+      
+      // Place player very close to vampire to ensure detection
+      mockPlayer.x = vampire.x + TILE_SIZE;
       mockPlayer.y = vampire.y;
+      
       const initialX = vampire.x;
       const initialY = vampire.y;
       
       // Force movement
       vampire.move(mockPlayer, mockLevel);
       
-      // Verify vampire moved in some direction
+      // Verify vampire moved away from player
       expect(vampire.x !== initialX || vampire.y !== initialY).toBe(true);
+      
+      // Additional check to verify it moved away from player
+      const newDistanceToPlayer = Math.sqrt(
+        Math.pow(vampire.x - mockPlayer.x, 2) + 
+        Math.pow(vampire.y - mockPlayer.y, 2)
+      );
+      const initialDistanceToPlayer = Math.sqrt(
+        Math.pow(initialX - mockPlayer.x, 2) + 
+        Math.pow(initialY - mockPlayer.y, 2)
+      );
+      expect(newDistanceToPlayer).toBeGreaterThan(initialDistanceToPlayer);
     });
   });
 });
