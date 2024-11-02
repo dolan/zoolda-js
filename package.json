@@ -5,10 +5,13 @@
   },
   "jest": {
     "transform": {},
-    "testEnvironment": "jsdom",
+    "testEnvironment": "jest-environment-jsdom",
     "extensionsToTreatAsEsm": [".js"],
     "moduleNameMapper": {
       "^(\\.{1,2}/.*)\\.js$": "$1"
     }
+  },
+  "devDependencies": {
+    "jest-environment-jsdom": "^29.7.0"
   }
 }
