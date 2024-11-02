@@ -3,25 +3,7 @@ import Player from './player.js';
 import LevelGenerator from './level-generator.js';
 import { Goblin, Orc, Demon, Vampire } from './enemy.js';
 
-class Oval {
-  constructor(x, y, width, height, isWalkable, fillRate = 0.7) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.isWalkable = isWalkable;
-    this.fillRate = fillRate;
-  }
-
-  isInside(x, y) {
-    // Normalize the point to the oval's center
-    const normalizedX = (x - this.x - this.width / 2) / (this.width / 2);
-    const normalizedY = (y - this.y - this.height / 2) / (this.height / 2);
-    
-    // Check if the point is inside the oval
-    return (normalizedX * normalizedX + normalizedY * normalizedY <= 1) && Math.random() < this.fillRate;
-  }
-}
+import Oval from './oval.js';
 
 export default class Game {
     constructor(canvas) {
