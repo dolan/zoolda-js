@@ -151,6 +151,22 @@ export default class Game {
         });
     }
 
+    isCollisionWithItem(itemX, itemY) {
+        // Get centers of player and item
+        const playerCenterX = this.player.x + TILE_SIZE / 2;
+        const playerCenterY = this.player.y + TILE_SIZE / 2;
+        const itemCenterX = itemX * TILE_SIZE + TILE_SIZE / 2;
+        const itemCenterY = itemY * TILE_SIZE + TILE_SIZE / 2;
+
+        // Calculate distance between centers
+        const dx = playerCenterX - itemCenterX;
+        const dy = playerCenterY - itemCenterY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Use a more forgiving radius (0.75 of tile size) for better gameplay feel
+        return distance < TILE_SIZE * 0.75;
+    }
+
     update() {
         if (this.gameActive) {
             this.handleInput();
@@ -171,7 +187,6 @@ export default class Game {
             this.enemies.forEach(enemy => enemy.move(this.player, this.level));
             
             // Update bullets
-
             if (this.bullets.length > 0) {
                 console.log('Updating bullets. Count:', this.bullets.length);
             }
@@ -197,24 +212,24 @@ export default class Game {
                 return !hitEnemy; // Remove bullet if it hit an enemy
             });
 
-            // Check if player collects a bullet
-            const playerTileX = Math.floor(this.player.x / TILE_SIZE);
-            const playerTileY = Math.floor(this.player.y / TILE_SIZE);
-            if (this.level[playerTileY][playerTileX] === BULLET_TILE_ID) {
-                this.player.collectBullet();
-                this.level[playerTileY][playerTileX] = 0; // Remove bullet from level
-                this.updateStatusDisplay();
-            }
-
-            // Check if player collects a crystal
-            if (this.level[playerTileY][playerTileX] === CRYSTAL_TILE_ID) {
-                this.player.collectCrystal();
-                this.level[playerTileY][playerTileX] = 0; // Remove crystal from level
-                if (this.player.crystals === this.requiredCrystals) {
-                    this.exitOpen = true;
-                    this.showMessage("Exit is now open!", 2000);
+            // Check for item collection using circular collision detection
+            for (let y = 0; y < this.level.length; y++) {
+                for (let x = 0; x < this.level[y].length; x++) {
+                    const tile = this.level[y][x];
+                    if ((tile === BULLET_TILE_ID || tile === CRYSTAL_TILE_ID) && this.isCollisionWithItem(x, y)) {
+                        if (tile === BULLET_TILE_ID) {
+                            this.player.collectBullet();
+                        } else if (tile === CRYSTAL_TILE_ID) {
+                            this.player.collectCrystal();
+                            if (this.player.crystals === this.requiredCrystals) {
+                                this.exitOpen = true;
+                                this.showMessage("Exit is now open!", 2000);
+                            }
+                        }
+                        this.level[y][x] = 0; // Remove collected item
+                        this.updateStatusDisplay();
+                    }
                 }
-                this.updateStatusDisplay();
             }
         }
     }
