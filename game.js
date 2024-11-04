@@ -28,7 +28,6 @@ export default class Game {
         this.gameActive = true;
         this.bullets = [];
         this.exitOpen = false;
-        this.monsterPositions = []; // Add this line
     }
 
     initializeGame() {
@@ -49,11 +48,6 @@ export default class Game {
                         default: return null;
                     }
                 }).filter(enemy => enemy !== null);
-                this.monsterPositions = this.enemies.map(enemy => ({
-                    x: Math.floor(enemy.x / TILE_SIZE),
-                    y: Math.floor(enemy.y / TILE_SIZE),
-                    type: this.getEnemyTileId(enemy)
-                }));
                 this.requiredCrystals = requiredCrystals;
                 this.exitOpen = false;
                 validLevel = true;
@@ -71,7 +65,7 @@ export default class Game {
             }
             if (e.key === ' ') {
                 this.shootBullet();
-                console.log('Spacebar pressed, shootBullet called'); // Add this for debugging
+                console.log('Spacebar pressed, shootBullet called');
             }
         });
         document.addEventListener('keyup', e => delete this.keys[e.key]);
@@ -81,7 +75,7 @@ export default class Game {
         const bullet = this.player.shoot();
         if (bullet) {
             this.bullets.push(bullet);
-            console.log('Bullet created:', bullet); // Add this for debugging
+            console.log('Bullet created:', bullet);
         }
         this.updateStatusDisplay();
     }
@@ -143,27 +137,27 @@ export default class Game {
 
     isCollisionWithEnemy(x, y) {
         const radius = (x === this.player.x && y === this.player.y) ? TILE_SIZE / 2 : 1; // Use smaller radius for bullets
-        return this.enemies.some(enemy => {
+        for (const enemy of this.enemies) {
             const dx = enemy.x + TILE_SIZE / 2 - (x + radius);
             const dy = enemy.y + TILE_SIZE / 2 - (y + radius);
             const distance = Math.sqrt(dx * dx + dy * dy);
-            return distance < radius + TILE_SIZE * 0.75; // 0.75 is the enemy collision radius factor
-        });
+            if (distance < radius + TILE_SIZE * 0.75) { // 0.75 is the enemy collision radius factor
+                return enemy; // Return the specific enemy that was hit
+            }
+        }
+        return null; // Return null if no enemy was hit
     }
 
     isCollisionWithItem(itemX, itemY) {
-        // Get centers of player and item
         const playerCenterX = this.player.x + TILE_SIZE / 2;
         const playerCenterY = this.player.y + TILE_SIZE / 2;
         const itemCenterX = itemX * TILE_SIZE + TILE_SIZE / 2;
         const itemCenterY = itemY * TILE_SIZE + TILE_SIZE / 2;
 
-        // Calculate distance between centers
         const dx = playerCenterX - itemCenterX;
         const dy = playerCenterY - itemCenterY;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Use a more forgiving radius (0.75 of tile size) for better gameplay feel
         return distance < TILE_SIZE * 0.75;
     }
 
@@ -171,21 +165,13 @@ export default class Game {
         if (this.gameActive) {
             this.handleInput();
             
-            // Update monster positions
-            this.enemies.forEach((enemy, index) => {
+            // Update enemies
+            this.enemies.forEach(enemy => {
                 enemy.move(this.player, this.level);
-                this.monsterPositions[index] = {
-                    x: Math.floor(enemy.x / TILE_SIZE),
-                    y: Math.floor(enemy.y / TILE_SIZE),
-                    type: this.getEnemyTileId(enemy)
-                };
             });
 
-            this.checkExit(); // Make sure this is called in the update method
+            this.checkExit();
 
-            // Move enemies
-            this.enemies.forEach(enemy => enemy.move(this.player, this.level));
-            
             // Update bullets
             if (this.bullets.length > 0) {
                 console.log('Updating bullets. Count:', this.bullets.length);
@@ -195,24 +181,24 @@ export default class Game {
                 
                 if (this.isCollisionWithWall(bullet.x, bullet.y, 1, 1)) {
                     console.log('Bullet hit wall');
-                    return false; // Remove bullet if it hits a wall
+                    return false;
                 }
                 
-                // Check for collision with enemies
-                let hitEnemy = false;
-                this.enemies = this.enemies.filter(enemy => {
-                    if (this.isCollisionWithEnemy(bullet.x, bullet.y)) {
-                        hitEnemy = true;
+                const hitEnemy = this.isCollisionWithEnemy(bullet.x, bullet.y);
+                if (hitEnemy) {
+                    // Remove only the specific enemy that was hit
+                    const enemyIndex = this.enemies.indexOf(hitEnemy);
+                    if (enemyIndex !== -1) {
+                        this.enemies.splice(enemyIndex, 1);
                         console.log('Bullet hit enemy');
-                        return false; // Remove enemy if hit by bullet
                     }
-                    return true;
-                });
+                    return false;
+                }
                 
-                return !hitEnemy; // Remove bullet if it hit an enemy
+                return true;
             });
 
-            // Check for item collection using circular collision detection
+            // Check for item collection
             for (let y = 0; y < this.level.length; y++) {
                 for (let x = 0; x < this.level[y].length; x++) {
                     const tile = this.level[y][x];
@@ -226,7 +212,7 @@ export default class Game {
                                 this.showMessage("Exit is now open!", 2000);
                             }
                         }
-                        this.level[y][x] = 0; // Remove collected item
+                        this.level[y][x] = 0;
                         this.updateStatusDisplay();
                     }
                 }
@@ -246,14 +232,17 @@ export default class Game {
             }
         }
 
-        // Draw monsters
-        this.monsterPositions.forEach(monster => {
-            const tileIcon = TILE_ICONS[monster.type];
-            this.ctx.fillText(tileIcon, monster.x * TILE_SIZE, monster.y * TILE_SIZE + TILE_SIZE);
+        // Draw player
+        this.player.draw(this.ctx);
+
+        // Draw enemies
+        this.enemies.forEach(enemy => {
+            const previousFillStyle = this.ctx.fillStyle;
+            enemy.draw(this.ctx);
+            this.ctx.fillStyle = previousFillStyle;
         });
 
-        this.player.draw(this.ctx);
-        this.enemies.forEach(enemy => enemy.draw(this.ctx));
+        // Draw bullets
         this.bullets.forEach(bullet => bullet.draw(this.ctx));
 
         if (this.message) {
@@ -271,6 +260,8 @@ export default class Game {
         const x = (this.canvas.width - messageWidth) / 2;
         const y = (this.canvas.height - messageHeight) / 2;
 
+        const previousFillStyle = this.ctx.fillStyle;
+        
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         this.ctx.fillRect(x, y, messageWidth, messageHeight);
 
@@ -286,6 +277,7 @@ export default class Game {
         this.ctx.textAlign = 'start';
         this.ctx.textBaseline = 'alphabetic';
         this.ctx.font = '32px Arial';
+        this.ctx.fillStyle = previousFillStyle;
     }
 
     gameLoop() {
@@ -331,8 +323,7 @@ export default class Game {
         const playerTileX = Math.floor(this.player.x / TILE_SIZE);
         const playerTileY = Math.floor(this.player.y / TILE_SIZE);
         
-        // Check if the player is on the exit tile
-        if (this.level[playerTileY][playerTileX] === 17) { // Assuming 3 is the exit tile ID
+        if (this.level[playerTileY][playerTileX] === 17) {
             if (this.exitOpen) {
                 this.gameActive = false;
                 this.message = "You escaped! You win!";

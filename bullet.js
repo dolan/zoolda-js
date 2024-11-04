@@ -19,7 +19,9 @@ export default class Bullet {
     }
 
     draw(ctx) {
+        const previousFillStyle = ctx.fillStyle;
         ctx.fillStyle = 'red';
         ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.fillStyle = previousFillStyle;
     }
 }
